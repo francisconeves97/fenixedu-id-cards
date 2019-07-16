@@ -10,7 +10,9 @@ import org.fenixedu.idcards.notifications.CardNotifications;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pt.ist.fenixframework.Atomic;
+import pt.ist.fenixframework.FenixFramework;
 
 @Task(englishTitle = "Remind users with expiring cards and cards to pickup", readOnly = true)
 public class SantanderCardsRemindersTask extends CronTask {
@@ -20,7 +22,7 @@ public class SantanderCardsRemindersTask extends CronTask {
 
     @Override
     public Atomic.TxMode getTxMode() {
-        return Atomic.TxMode.WRITE;
+        return Atomic.TxMode.READ;
     }
 
     @Override
@@ -36,14 +38,18 @@ public class SantanderCardsRemindersTask extends CronTask {
         SantanderCardState state = entry.getState();
         if (SantanderCardState.DELIVERED.equals(state) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
                 .getExpiryDate().minusDays(DAYS_TO_EXPIRE))) {
-            entry.setWasExpiringNotified(true);
-            CardNotifications.notifyCardExpiring(user);
-            taskLog("Notifying user for expiring card: %s%n", user.getUsername());
+            FenixFramework.atomic(() -> {
+                entry.setWasExpiringNotified(true);
+                CardNotifications.notifyCardExpiring(user);
+                taskLog("Notifying user for expiring card: %s%n", user.getUsername());
+            });
         } else if (SantanderCardState.ISSUED.equals(entry.getState()) && !entry.getWasPickupNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
                 .getLastTransition().getTransitionDate().plusDays(15))) {
-            entry.setWasPickupNotified(true);
-            CardNotifications.notifyCardPickup(user);
-            taskLog("Notifying user to pickup card: %s%n", user.getUsername());
+            FenixFramework.atomic(() -> {
+                entry.setWasPickupNotified(true);
+                CardNotifications.notifyCardPickup(user);
+                taskLog("Notifying user to pickup card: %s%n", user.getUsername());
+            });
         }
     }
 }
