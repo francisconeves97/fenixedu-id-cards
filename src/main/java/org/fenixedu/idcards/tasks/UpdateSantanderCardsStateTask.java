@@ -13,9 +13,8 @@ import org.fenixedu.idcards.domain.SantanderEntry;
 import org.fenixedu.idcards.notifications.CardNotifications;
 import org.fenixedu.idcards.service.SantanderIdCardsService;
 import org.fenixedu.santandersdk.dto.RegisterAction;
+import org.fenixedu.santandersdk.exception.SantanderMissingInformationException;
 import org.fenixedu.santandersdk.exception.SantanderNoRoleAvailableException;
-import org.fenixedu.santandersdk.exception.SantanderValidationException;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +72,7 @@ public class UpdateSantanderCardsStateTask extends CronTask {
                 taskLog("Requested card for user %s%n", user.getUsername());
             } catch (SantanderNoRoleAvailableException e) {
                 taskLog("No role available for %s%n", user.getUsername());
-            } catch (SantanderValidationException sve) {
+            } catch (SantanderMissingInformationException sve) {
                 taskLog("Error generating card for %s: %s%n", user.getUsername(), sve.getMessage());
                 notifyMissingInformation(user, sve.getMessage());
             } catch (Exception oe) {
