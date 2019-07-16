@@ -16,7 +16,7 @@ import pt.ist.fenixframework.Atomic;
 public class CardsRemindersTask extends CronTask {
 
     private static final Logger logger = LoggerFactory.getLogger(CardsRemindersTask.class);
-    private final int DAYS_TO_EXPIRE = 30;   // TODO: check santander request rate
+    private final int DAYS_TO_EXPIRE = 30;
 
     @Override
     public Atomic.TxMode getTxMode() {
@@ -30,11 +30,11 @@ public class CardsRemindersTask extends CronTask {
                 .forEach(this::remindUser);
     }
 
-    public void remindUser(User user) {
-        
+    private void remindUser(User user) {
+
         SantanderEntry entry = user.getCurrentSantanderEntry();
         SantanderCardState newState = entry.getState();
-        if (SantanderCardState.ISSUED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
+        if (SantanderCardState.DELIVERED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
                 .getExpiryDate().minusDays(DAYS_TO_EXPIRE))) {
             entry.setWasExpiringNotified(true);
             CardNotifications.notifyCardExpiring(user);
