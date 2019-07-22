@@ -64,11 +64,14 @@ public class UpdateSantanderCardsStateTask extends CronTask {
             try {
                 List<RegisterAction> availableActions = cardsService.getPersonAvailableActions(user.getCurrentSantanderEntry());
                 RegisterAction action = RegisterAction.RENU;
+
                 if (availableActions.contains(RegisterAction.NOVO)) {
                     action = RegisterAction.NOVO;
                 }
+
                 SantanderEntry entry = cardsService.createRegister(user, action, "Automatic task request");
                 cardsService.sendRegister(user, entry);
+
                 taskLog("Requested card for user %s%n", user.getUsername());
             } catch (SantanderCardNoPermissionException e) {
                 taskLog("No permission to request card for user %s%n", user.getUsername());
