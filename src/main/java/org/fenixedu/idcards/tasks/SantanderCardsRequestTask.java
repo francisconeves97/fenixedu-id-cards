@@ -1,7 +1,5 @@
 package org.fenixedu.idcards.tasks;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Locale;
 
 import org.fenixedu.bennu.core.domain.Bennu;
