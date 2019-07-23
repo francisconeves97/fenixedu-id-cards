@@ -37,7 +37,7 @@ public class SantanderCardsRequestTask extends CronTask {
     @Override
     public void runTask() throws Exception {
         Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() == null) //TODO remove limit
-                .forEach(user -> requestCard(user));
+                .forEach(this::requestCard);
     }
 
     public void requestCard(User user) {
@@ -59,11 +59,8 @@ public class SantanderCardsRequestTask extends CronTask {
                         user.getCurrentSantanderEntry().getExternalId(), sve.getMessage());
                 return;
             } catch (Exception e) {
-                StringWriter sWriter = new StringWriter();
-                PrintWriter pWriter = new PrintWriter(sWriter);
-                e.printStackTrace(pWriter);
-                taskLog("Failed for user %s (current SantanderEntry: %s): %s%n", user.getUsername(),
-                        user.getCurrentSantanderEntry().getExternalId(), sWriter.toString());
+                taskLog("Failed for user %s (current SantanderEntry: %s)%n", user.getUsername(),
+                        user.getCurrentSantanderEntry().getExternalId());
             }
         });
         try {
