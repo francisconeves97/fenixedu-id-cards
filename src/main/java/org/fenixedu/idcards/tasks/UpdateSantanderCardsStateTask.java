@@ -1,5 +1,8 @@
 package org.fenixedu.idcards.tasks;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.fenixedu.bennu.core.domain.Bennu;
 import org.fenixedu.bennu.core.domain.User;
 import org.fenixedu.bennu.scheduler.CronTask;
@@ -12,14 +15,12 @@ import org.fenixedu.idcards.notifications.CardNotifications;
 import org.fenixedu.idcards.service.SantanderIdCardsService;
 import org.fenixedu.santandersdk.dto.RegisterAction;
 import org.fenixedu.santandersdk.exception.SantanderMissingInformationException;
+import org.fenixedu.santandersdk.exception.SantanderValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
-
-import java.util.List;
-import java.util.Locale;
 
 @Task(englishTitle = "Update users cards", readOnly = true)
 public class UpdateSantanderCardsStateTask extends CronTask {
@@ -75,11 +76,19 @@ public class UpdateSantanderCardsStateTask extends CronTask {
                 taskLog("Requested card for user %s%n", user.getUsername());
             } catch (SantanderCardNoPermissionException e) {
                 taskLog("No permission to request card for user %s%n", user.getUsername());
+                return;
+
             } catch (SantanderMissingInformationException smie) {
-                taskLog("Error generating card for %s: %s%n", user.getUsername(), smie.getMessage());
+                taskLog("User %s has missing information: %s%n", user.getUsername(), smie.getMessage());
                 notifyMissingInformation(user, smie.getMessage());
+                return;
+            } catch (SantanderValidationException sve) {
+                taskLog("Error generating card for %s (current SantanderEntry: %s): %s%n", user.getUsername(),
+                        user.getCurrentSantanderEntry().getExternalId(), sve.getMessage());
+                return;
             } catch (Exception oe) {
-                taskLog("Failed for user %s: %s%n", user.getUsername(), oe);
+                taskLog("Failed for user %s(current SantanderEntry: %s): %s%n", user.getUsername(),
+                        user.getCurrentSantanderEntry().getExternalId(), oe);
             }
         });
 
