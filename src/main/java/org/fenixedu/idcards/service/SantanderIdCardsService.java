@@ -105,25 +105,25 @@ public class SantanderIdCardsService {
         SantanderCardState cardState = entry.getState();
 
         switch (cardState) {
-        case IGNORED:
-        case EXPIRED:
-            return entry;
-        case ISSUED:
-        case DELIVERED:
-            if (entry.getSantanderCardInfo().getExpiryDate().isBefore(DateTime.now())) {
-                entry.updateStateAndNotify(SantanderCardState.EXPIRED);
-            }
-            return entry;
-        case PENDING:
-            return synchronizeFenixAndSantanderStates(user, entry);
-        case REJECTED:
-        case NEW:
-        case READY_FOR_PRODUCTION:
-        case PRODUCTION:
-            return checkAndUpdateState(entry);
-        default:
-            LOGGER.debug("SantanderEntry " + entry.getExternalId() + " has unknown state (" + cardState.name() + ")");
-            return entry;
+            case IGNORED:
+            case EXPIRED:
+                return entry;
+            case ISSUED:
+            case DELIVERED:
+                if (entry.getSantanderCardInfo().getExpiryDate().isBefore(DateTime.now())) {
+                    entry.updateStateAndNotify(SantanderCardState.EXPIRED);
+                }
+                return entry;
+            case PENDING:
+                return synchronizeFenixAndSantanderStates(user, entry);
+            case REJECTED:
+            case NEW:
+            case READY_FOR_PRODUCTION:
+            case PRODUCTION:
+                return checkAndUpdateState(entry);
+            default:
+                LOGGER.debug("SantanderEntry " + entry.getExternalId() + " has unknown state (" + cardState.name() + ")");
+                return entry;
         }
     }
 
@@ -140,38 +140,38 @@ public class SantanderIdCardsService {
         GetRegisterStatus status = registerData.getStatus();
 
         switch (status) {
-        case REJECTED_REQUEST:
-            entry.updateState(SantanderCardState.REJECTED);
-            return entry;
+            case REJECTED_REQUEST:
+                entry.updateState(SantanderCardState.REJECTED);
+                return entry;
 
-        case REMI_REQUEST:
-        case RENU_REQUEST:
-            entry.updateStateAndNotify(SantanderCardState.NEW);
-            return entry;
+            case REMI_REQUEST:
+            case RENU_REQUEST:
+                entry.updateStateAndNotify(SantanderCardState.NEW);
+                return entry;
 
-        case READY_FOR_PRODUCTION:
-            entry.updateState(SantanderCardState.READY_FOR_PRODUCTION);
-            return entry;
-        case PRODUCTION:
-            entry.updateState(SantanderCardState.PRODUCTION);
-            return entry;
+            case READY_FOR_PRODUCTION:
+                entry.updateState(SantanderCardState.READY_FOR_PRODUCTION);
+                return entry;
+            case PRODUCTION:
+                entry.updateState(SantanderCardState.PRODUCTION);
+                return entry;
 
-        case ISSUED:
-            if (!SantanderEntry.hasMifare(entry.getUser(), registerData.getMifare())) {
-                entry.updateIssued(registerData);
-            }
-            return entry;
+            case ISSUED:
+                if (!SantanderEntry.hasMifare(entry.getUser(), registerData.getMifare())) {
+                    entry.updateIssued(registerData);
+                }
+                return entry;
 
-        case NO_RESULT:
-            // syncing problem between both services
-            if (!entry.wasRegisterSuccessful()) {
-                entry.updateState(SantanderCardState.IGNORED);
-            }
-            return entry;
-        case UNKNOWN:
-            LOGGER.debug("Card has unkown state:  " + status);
-        default:
-            LOGGER.debug("Not supported status:  " + status);
+            case NO_RESULT:
+                // syncing problem between both services
+                if (!entry.wasRegisterSuccessful()) {
+                    entry.updateState(SantanderCardState.IGNORED);
+                }
+                return entry;
+            case UNKNOWN:
+                LOGGER.debug("Card has unkown state:  " + status);
+            default:
+                LOGGER.debug("Not supported status:  " + status);
         }
 
         return entry;
@@ -238,10 +238,6 @@ public class SantanderIdCardsService {
 
     public SantanderEntry createRegister(User user, RegisterAction action, String requestReason)
             throws SantanderValidationException {
-        if (!getPersonAvailableActions(user.getCurrentSantanderEntry()).contains(action)) {
-            LOGGER.debug("Action (" + action.name() + ") not available for user " + user.getUsername());
-            throw new SantanderValidationException("santander.id.cards.error.wrong.request.action");
-        }
 
         SantanderUser santanderUser = new SantanderUser(user, userInfoService);
         CreateRegisterRequest createRegisterRequest = santanderUser.toCreateRegisterRequest(action);
@@ -275,17 +271,17 @@ public class SantanderIdCardsService {
         SantanderCardState cardState = entry.getState();
 
         switch (cardState) {
-        case IGNORED:
-            entry.reset(cardPreviewBean, pickupLocation, requestReason);
-            return entry;
-        case REJECTED:
-        case ISSUED:
-        case DELIVERED:
-        case EXPIRED:
-            return new SantanderEntry(user, cardPreviewBean, pickupLocation, requestReason);
-        default:
-            //should be impossible to reach;
-            throw new SantanderValidationException("santander.id.cards.error.santander.entry.invalid.state");
+            case IGNORED:
+                entry.reset(cardPreviewBean, pickupLocation, requestReason);
+                return entry;
+            case REJECTED:
+            case ISSUED:
+            case DELIVERED:
+            case EXPIRED:
+                return new SantanderEntry(user, cardPreviewBean, pickupLocation, requestReason);
+            default:
+                //should be impossible to reach;
+                throw new SantanderValidationException("santander.id.cards.error.santander.entry.invalid.state");
         }
     }
 
