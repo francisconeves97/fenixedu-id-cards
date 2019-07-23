@@ -35,7 +35,7 @@ public class SantanderCardsRequestTask extends CronTask {
     }
 
     @Override
-    public void runTask() throws Exception {
+    public void runTask() {
         Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() == null) //TODO remove limit
                 .forEach(this::requestCard);
     }
