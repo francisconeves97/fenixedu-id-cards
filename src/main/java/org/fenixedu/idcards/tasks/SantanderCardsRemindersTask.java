@@ -27,9 +27,10 @@ public class SantanderCardsRemindersTask extends CronTask {
 
     @Override
     public void runTask() {
-        Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() != null &&
-                (SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState())
-                || SantanderCardState.DELIVERED.equals(u.getCurrentSantanderEntry().getState())))
+        Bennu.getInstance().getUserSet().stream()
+                .filter(u -> u.getCurrentSantanderEntry() != null
+                        && (SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState())
+                                || SantanderCardState.DELIVERED.equals(u.getCurrentSantanderEntry().getState())))
                 .forEach(this::remindUser);
     }
 
@@ -41,14 +42,14 @@ public class SantanderCardsRemindersTask extends CronTask {
             FenixFramework.atomic(() -> {
                 entry.setWasExpiringNotified(true);
                 CardNotifications.notifyCardExpiring(user);
-                taskLog("Notifying user for expiring card: %s%n", user.getUsername());
+                logger.debug("Notifying user for expiring card: {}", user.getUsername());
             });
         } else if (SantanderCardState.ISSUED.equals(entry.getState()) && !entry.getWasPickupNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
                 .getLastTransition().getTransitionDate().plusDays(15))) {
             FenixFramework.atomic(() -> {
                 entry.setWasPickupNotified(true);
                 CardNotifications.notifyCardPickup(user);
-                taskLog("Notifying user to pickup card: %s%n", user.getUsername());
+                logger.debug("Notifying user to pickup card: {}", user.getUsername());
             });
         }
     }

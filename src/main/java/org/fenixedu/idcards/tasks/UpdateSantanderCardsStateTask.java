@@ -28,6 +28,7 @@ public class UpdateSantanderCardsStateTask extends CronTask {
     private static final Logger logger = LoggerFactory.getLogger(UpdateSantanderCardsStateTask.class);
     private SantanderIdCardsService cardsService = BennuSpringContextHelper.getBean(SantanderIdCardsService.class);
     private final int waitTime = 100;   // TODO: check santander request rate
+    private static boolean waitFlag = false; //If the webservice is invoked we must wait calling before  it again
 
     @Override
     public Atomic.TxMode getTxMode() {
@@ -48,7 +49,6 @@ public class UpdateSantanderCardsStateTask extends CronTask {
         switch (oldCardState) {
             case IGNORED:
             case ISSUED:
-
             case EXPIRED:
             case DELIVERED:
                 break;
@@ -61,6 +61,7 @@ public class UpdateSantanderCardsStateTask extends CronTask {
     }
 
     private void requestCard(User user) {
+        waitFlag = false;
         FenixFramework.atomic(() -> {
             try {
                 List<RegisterAction> availableActions = cardsService.getPersonAvailableActions(user.getCurrentSantanderEntry());
@@ -73,26 +74,29 @@ public class UpdateSantanderCardsStateTask extends CronTask {
                 SantanderEntry entry = cardsService.createRegister(user, action, "Automatic task request");
                 cardsService.sendRegister(user, entry);
 
-                taskLog("Requested card for user %s%n", user.getUsername());
+                logger.debug("Requested card for user {} (current SantanderEntry: {})", user.getUsername(),
+                        user.getCurrentSantanderEntry().getExternalId());
+                waitFlag = true;
             } catch (SantanderCardNoPermissionException e) {
-                taskLog("No permission to request card for user %s%n", user.getUsername());
-                return;
-
+                logger.debug("No permission to request card for user {}", user.getUsername());
             } catch (SantanderMissingInformationException smie) {
-                taskLog("User %s has missing information: %s%n", user.getUsername(), smie.getMessage());
+                logger.debug("User {} has missing information: {}", user.getUsername(), smie.getMessage());
                 notifyMissingInformation(user, smie.getMessage());
-                return;
             } catch (SantanderValidationException sve) {
-                taskLog("Error generating card for %s (current SantanderEntry: %s): %s%n", user.getUsername(),
-                        user.getCurrentSantanderEntry().getExternalId(), sve.getMessage());
-                return;
-            } catch (Exception oe) {
-                taskLog("Failed for user %s(current SantanderEntry: %s): %s%n", user.getUsername(),
-                        user.getCurrentSantanderEntry().getExternalId(), oe);
+                logger.debug("Error generating card for {} (current SantanderEntry: {}): {}", user.getUsername(),
+                        user.getCurrentSantanderEntry() == null ? "null" : user.getCurrentSantanderEntry().getExternalId(),
+                        sve.getMessage());
+                waitFlag = true;
+            } catch (Throwable t) {
+                logger.error(String.format("Failed for user %s (current SantanderEntry: %s)", user.getUsername(),
+                        user.getCurrentSantanderEntry() == null ? "null" : user.getCurrentSantanderEntry().getExternalId()), t);
+                waitFlag = true;
             }
         });
 
-        sleep();
+        if (waitFlag) {
+            sleep();
+        }
     }
 
     private void notifyMissingInformation(User user, String errors) {
