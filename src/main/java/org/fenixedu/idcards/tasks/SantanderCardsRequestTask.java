@@ -35,7 +35,7 @@ public class SantanderCardsRequestTask extends CronTask {
 
     @Override
     public void runTask() {
-        Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() == null)
+        Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() == null && idCardsService.canRequestCard(u))
                 .forEach(this::requestCard);
     }
 
