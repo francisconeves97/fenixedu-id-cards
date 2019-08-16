@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
 @Task(englishTitle = "Notify users with expiring cards", readOnly = true)
-public class CardsRemindersTask extends CronTask {
+public class SantanderCardsRemindersTask extends CronTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(CardsRemindersTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(SantanderCardsRemindersTask.class);
     private final int DAYS_TO_EXPIRE = 30;
 
     @Override
@@ -31,7 +31,6 @@ public class CardsRemindersTask extends CronTask {
     }
 
     private void remindUser(User user) {
-
         SantanderEntry entry = user.getCurrentSantanderEntry();
         SantanderCardState newState = entry.getState();
         if (SantanderCardState.DELIVERED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
