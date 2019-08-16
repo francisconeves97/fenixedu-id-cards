@@ -165,7 +165,7 @@ public class SantanderEntry extends SantanderEntry_Base {
         if (cardInfo.getExpiryDate() == null)
             cardInfo.setExpiryDate(registerData.getExpiryDate());
         DateTime expeditionDate = registerData.getExpeditionDate() == null ? DateTime.now() : registerData.getExpeditionDate();
-        updateStateAndNotify(SantanderCardState.ISSUED, expeditionDate);
+        updateState(SantanderCardState.ISSUED, expeditionDate);
     }
 
     @Atomic(mode = TxMode.WRITE)
