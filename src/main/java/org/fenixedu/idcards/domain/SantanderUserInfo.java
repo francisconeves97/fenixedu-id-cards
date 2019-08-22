@@ -25,8 +25,8 @@ public class SantanderUserInfo extends SantanderUserInfo_Base {
 
     @Override
     public void setCardName(String cardName) {
-        cardName = cardName.length() > 40 ? cardName.substring(0, 40) : cardName;
         cardName = cardName.toUpperCase().trim();
+        cardName = cardName.length() > 40 ? cardName.substring(0, 40) : cardName;
         super.setCardName(cardName);
     }
 
