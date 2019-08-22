@@ -102,8 +102,8 @@ public class SantanderUser {
             String fullName = getFullName();
             String[] fullNameParts = fullName.trim().split(" ");
             String cardName = fullNameParts[0] + " " + fullNameParts[fullNameParts.length - 1];
-            cardName = cardName.length() > 40 ? cardName.substring(0, 40) : cardName;
-            santanderUserInfo = new SantanderUserInfo(cardName);
+            santanderUserInfo = new SantanderUserInfo();
+            santanderUserInfo.setCardName(cardName);
             user.setSantanderUserInfo(santanderUserInfo);
         }
 
