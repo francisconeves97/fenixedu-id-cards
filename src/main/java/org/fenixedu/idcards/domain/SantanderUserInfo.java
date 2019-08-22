@@ -45,7 +45,7 @@ public class SantanderUserInfo extends SantanderUserInfo_Base {
         }
 
         // Card names must not appear in higher frequency that in fullName
-        for(String name: new HashSet<>(fullNameParts)) {
+        for(String name: new HashSet<>(cardNameParts)) {
             if (Collections.frequency(fullNameParts, name) < Collections.frequency(cardNameParts, name)) {
                 return false;
             }
