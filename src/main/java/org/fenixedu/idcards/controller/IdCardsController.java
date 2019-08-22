@@ -8,6 +8,7 @@ import org.fenixedu.commons.i18n.I18N;
 import org.fenixedu.idcards.domain.SantanderCardInfo;
 import org.fenixedu.idcards.domain.SantanderCardState;
 import org.fenixedu.idcards.domain.SantanderEntry;
+import org.fenixedu.idcards.domain.SantanderUserInfo;
 import org.fenixedu.idcards.service.SantanderIdCardsService;
 import org.fenixedu.santandersdk.exception.SantanderValidationException;
 import org.slf4j.Logger;
@@ -75,6 +76,22 @@ public class IdCardsController {
         response.addProperty("givenNames", user.getProfile().getGivenNames());
         response.addProperty("familyNames", user.getProfile().getFamilyNames());
         return ResponseEntity.ok(response.toString());
+    }
+
+    @RequestMapping(value = "change-card-name", method = RequestMethod.POST)
+    public ResponseEntity<?> changeCardName(User user, String cardName) {
+        SantanderUserInfo userInfo = user.getSantanderUserInfo();
+
+        if (userInfo == null) {
+            userInfo = new SantanderUserInfo();
+        }
+
+        if (SantanderUserInfo.isCardNameValid(user, cardName)) {
+            userInfo.setCardName(cardName);
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @SkipCSRF
