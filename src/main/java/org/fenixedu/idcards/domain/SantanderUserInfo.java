@@ -79,14 +79,14 @@ public class SantanderUserInfo extends SantanderUserInfo_Base {
         // At least one given name must be present
         boolean givenNamePresent = givenNames.stream()
                 .filter(n -> !excludedNames.contains(n))
-                .anyMatch(n -> cardNameParts.contains(n) && cardNameParts.remove(n));
+                .anyMatch(n -> cardNameParts.contains(n) && cardNameParts.remove(n)); // Remove so the same name isnt matched in family name
 
         // At least one family name must be present
         boolean familyNamePresent = familyNames.stream()
                 .filter(n -> !excludedNames.contains(n))
                 .anyMatch(cardNameParts::contains);
 
-        // Name must have a maximum of 40 characters
+        // Card name must have a maximum of 40 characters
         return givenNamePresent && familyNamePresent && cardName.length() <= 40;
     }
 }

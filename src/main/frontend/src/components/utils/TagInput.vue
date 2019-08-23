@@ -10,6 +10,7 @@
       class="f-tag-field__tag">
       {{ tag.value }}
       <button
+        v-if="!tag.disableRemoveAction"
         type="button"
         class="f-tag-field__tag-remove"
         aria-label="Remove"
@@ -40,6 +41,9 @@
           </g>
         </svg>
       </button>
+      <div
+        v-else
+        :style="{ width: '14px', height: '14px' }" />
     </div>
   </div>
 </template>

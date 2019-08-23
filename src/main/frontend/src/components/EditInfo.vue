@@ -31,10 +31,15 @@
             </div>
             <tag-input
               :tags="userNamesList"
-              :class="{ 'f-field--danger': isNameInvalid }"
+              :class="{ 'f-field--danger': userNameExceedsLength }"
               @remove-tag="removeUserName"/>
             <p
-              :class="{ danger: isNameInvalid}"
+              v-if="userNameExceedsLength"
+              class="small f-field__validation danger">
+              Please shorten your displayed name (until 40 chars including spaces).
+            </p>
+            <p
+              v-else
               class="small f-field__validation">If you want to shorten your displayed name,
               choose at least one of your first and last names.
             </p>
@@ -51,7 +56,7 @@
           {{ $t('btn.cancel') }}
         </button>
         <button
-          :class="{ 'btn--disabled': isNameInvalid}"
+          :class="{ 'btn--disabled': userNameExceedsLength}"
           class="btn btn--primary"
           @click.prevent="">
           {{ $t('btn.confirm') }}
@@ -83,23 +88,19 @@ export default {
   data () {
     return {
       hasPendingRequest: false,
-      userNamesList: [],
-      userNames: undefined,
+      fullName: undefined,
+      chosenUserNames: { givenNames: [], familyNames: [] },
       exludedNames: ['da', 'das', 'do', 'dos', 'de', 'e']
     }
   },
   computed: {
-    isNameInvalid () {
-      const nameLength = this.userNamesList.reduce((total, name) => total + name.value.length, 0)
-      return nameLength > 40 || this.selectedFamilyNames < 1 || this.selectedGivenNames < 1
+    userNameExceedsLength () {
+      const nameLength = this.userNamesList.map(name => name.value).join(' ').length
+      return nameLength > 40
     },
-    selectedGivenNames () {
-      const givenNamesList = this.userNamesList.filter(name => name.isGivenName)
-      return givenNamesList.length - givenNamesList.filter(name => this.exludedNames.includes(name.value)).length
-    },
-    selectedFamilyNames () {
-      const familyNamesList = this.userNamesList.filter(name => !name.isGivenName)
-      return familyNamesList.length - familyNamesList.filter(name => this.exludedNames.includes(name.value)).length
+    userNamesList () {
+      const { givenNames, familyNames } = this.chosenUserNames
+      return [...givenNames, ...familyNames]
     }
   },
   watch: {
@@ -107,7 +108,7 @@ export default {
       immediate: true,
       handler (open) {
         if (open) {
-          if (!this.userNames) {
+          if (!this.fullName) {
             this.fetchUserNames()
           } else {
             this.resetNames()
@@ -120,18 +121,35 @@ export default {
     async fetchUserNames () {
       this.hasPendingRequest = true
       const response = await CardsAPI.getUserNames()
-      this.userNames = response
+      this.fullName = response
       this.resetNames()
       this.hasPendingRequest = false
     },
     removeUserName (name, index) {
-      this.userNamesList.splice(index, 1)
+      const { givenNames, familyNames } = this.chosenUserNames
+      const numGivenNames = givenNames.length
+      if (index <= numGivenNames - 1) {
+        givenNames.splice(index, 1)
+
+        const validGivenNames = givenNames.filter(name => !this.exludedNames.includes(name.value))
+        if (validGivenNames.length === 1) {
+          givenNames.find(name => name.value === validGivenNames[0].value).disableRemoveAction = true
+        }
+      } else {
+        familyNames.splice(index - numGivenNames, 1)
+        const validFamilyNames = familyNames.filter(name => !this.exludedNames.includes(name.value))
+        if (validFamilyNames.length === 1) {
+          familyNames.find(name => name.value === validFamilyNames[0].value).disableRemoveAction = true
+        }
+      }
     },
     resetNames () {
-      const givenNamesList = this.userNames.givenNames.split(' ')
-      const familyNamesList = this.userNames.familyNames.split(' ')
-      this.userNamesList = [...givenNamesList.map(n => ({ value: n, isGivenName: true })),
-        ...familyNamesList.map(n => ({ value: n, isGivenName: false }))]
+      const givenNamesList = this.fullName.givenNames.split(' ')
+      const familyNamesList = this.fullName.familyNames.split(' ')
+      this.chosenUserNames = {
+        givenNames: givenNamesList.map(n => ({ value: n })),
+        familyNames: familyNamesList.map(n => ({ value: n }))
+      }
     }
   }
 }
