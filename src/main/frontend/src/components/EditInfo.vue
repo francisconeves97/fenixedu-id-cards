@@ -51,14 +51,15 @@
       slot="modal-footer">
       <div class="btn--group layout-list-cards__modal-footer">
         <button
+          :class="{ 'btn--disabled': hasPendingRequest}"
           class="btn btn--light"
           @click.prevent="$emit('close')">
           {{ $t('btn.cancel') }}
         </button>
         <button
-          :class="{ 'btn--disabled': userNameExceedsLength}"
+          :class="{ 'btn--disabled': userNameExceedsLength || hasPendingRequest}"
           class="btn btn--primary"
-          @click.prevent="">
+          @click.prevent="submitCardName">
           {{ $t('btn.confirm') }}
         </button>
       </div>
@@ -67,6 +68,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import CardsAPI from '@/api/cards'
 import Loading from '@/components/Loading'
 import Modal from '@/components/utils/Modal'
@@ -118,12 +120,22 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'fetchPreview'
+    ]),
     async fetchUserNames () {
       this.hasPendingRequest = true
       const response = await CardsAPI.getUserNames()
       this.fullName = response
       this.resetNames()
       this.hasPendingRequest = false
+    },
+    async submitCardName () {
+      this.hasPendingRequest = true
+      await CardsAPI.changeCardName(this.userNamesList.map(name => name.value).join(' '))
+      this.fetchPreview()
+      this.hasPendingRequest = false
+      this.$emit('close')
     },
     removeUserName (name, index) {
       const { givenNames, familyNames } = this.chosenUserNames
@@ -159,7 +171,7 @@ export default {
 // import variables
 @import "@/assets/scss/_variables.scss";
 
-.layout-list-cards.layout-list-cards-form .f-group{
+.f-group{
   text-align: left;
 
   .f-field--readonly {

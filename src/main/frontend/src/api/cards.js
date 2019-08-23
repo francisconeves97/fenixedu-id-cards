@@ -23,10 +23,15 @@ async function getUserNames () {
   return response.data
 }
 
+async function changeCardName (cardName) {
+  await client.post('/idcards/change-card-name', cardName, { headers: { 'X-Requested-With': 'fenixedu-id-cards-frontend', 'Content-Type': 'text/plain' } })
+}
+
 export default {
   getCards,
   getPreview,
   requestNew,
   deliverCard,
-  getUserNames
+  getUserNames,
+  changeCardName
 }

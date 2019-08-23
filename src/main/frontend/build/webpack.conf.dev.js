@@ -117,7 +117,7 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
-    host: 'localhost',
+    host: '0.0.0.0',
     port: process.env.MOCK ? 8081 : 8082,
     https: true,
     open: true,

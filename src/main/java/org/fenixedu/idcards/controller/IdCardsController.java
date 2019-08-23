@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 
+import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 @RestController
@@ -78,17 +79,11 @@ public class IdCardsController {
         return ResponseEntity.ok(response.toString());
     }
 
+    @SkipCSRF
     @RequestMapping(value = "change-card-name", method = RequestMethod.POST)
-    public ResponseEntity<?> changeCardName(User user, String cardName) {
-        SantanderUserInfo userInfo = user.getSantanderUserInfo();
-
-        if (userInfo == null) {
-            userInfo = new SantanderUserInfo();
-        }
-
-        if (SantanderUserInfo.isCardNameValid(user, cardName)) {
-            userInfo.setCardName(cardName);
-            return ResponseEntity.ok().build();
+    public ResponseEntity<?> changeCardName(User user, @RequestBody String cardName) {
+        if (updateCardName(user, cardName)) {
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.badRequest().build();
@@ -165,6 +160,22 @@ public class IdCardsController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @Atomic
+    private boolean updateCardName(User user, String cardName) {
+        SantanderUserInfo userInfo = user.getSantanderUserInfo();
+
+        if (SantanderUserInfo.isCardNameValid(user, cardName)) {
+            if (userInfo == null) {
+                userInfo = new SantanderUserInfo();
+            }
+
+            userInfo.setCardName(cardName);
+            return true;
+        }
+
+        return false;
     }
 
     private boolean isIdCardManager(User user) {
