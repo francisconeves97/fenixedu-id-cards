@@ -157,10 +157,12 @@ export default {
     },
     resetNames () {
       const givenNamesList = this.fullName.givenNames.split(' ')
+      const validGivenNames = givenNamesList.filter(name => !this.exludedNames.includes(name.value))
       const familyNamesList = this.fullName.familyNames.split(' ')
+      const validFamilyNames = familyNamesList.filter(name => !this.exludedNames.includes(name.value))
       this.chosenUserNames = {
-        givenNames: givenNamesList.map(n => ({ value: n })),
-        familyNames: familyNamesList.map(n => ({ value: n }))
+        givenNames: givenNamesList.map(n => ({ value: n, disableRemoveAction: validGivenNames.length === 1 })),
+        familyNames: familyNamesList.map(n => ({ value: n, disableRemoveAction: validFamilyNames.length === 1 }))
       }
     }
   }
