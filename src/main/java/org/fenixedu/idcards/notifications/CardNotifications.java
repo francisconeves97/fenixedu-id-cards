@@ -17,7 +17,7 @@ import org.joda.time.DateTime;
         text = "Your card request was successful, you'll be notified for it's pickup soon."
 )
 @DeclareMessageTemplate(
-        id = "message.template.santander.card.state.transition.pickup",
+        id = "message.template.santander.card.state.transition.pickup.with.working.hours",
         description = "Card is ready for pickup message",
         subject = "Ready for pickup",
         text = "Your card is ready to be delivered to you at {{ pickupLocation }}, {{ campus }}, between {{ morningHours }} and {{ afternoonHours }}. (workdays)",
@@ -25,6 +25,15 @@ import org.joda.time.DateTime;
                 @TemplateParameter(id = "pickupLocation", description = "Location to pickup card"),
                 @TemplateParameter(id = "morningHours", description = "Morning hours"),
                 @TemplateParameter(id ="afternoonHours", description = "Afternoon Hours")
+        }
+)
+@DeclareMessageTemplate(
+        id = "message.template.santander.card.state.transition.pickup",
+        description = "Card is ready for pickup message",
+        subject = "Ready for pickup",
+        text = "Your card is ready to be delivered to you at {{ pickupLocation }}, {{ campus }}. (workdays)",
+        parameters = {
+                @TemplateParameter(id = "pickupLocation", description = "Location to pickup card")
         }
 )
 @DeclareMessageTemplate(
@@ -57,14 +66,23 @@ public class CardNotifications {
         SantanderEntry entry = user.getCurrentSantanderEntry();
 
         PickupLocation pickupLocation = entry.getSantanderCardInfo().getPickupLocation();
-        Message.fromSystem()
+
+        String template = pickupLocation.getMorningHours() == null ?
+                "message.template.santander.card.state.transition.pickup" :
+                "message.template.santander.card.state.transition.pickup.with.working.hours";
+
+        Message.TemplateMessageBuilder builder = Message.fromSystem()
                 .to(Group.users(entry.getUser()))
-                .template("message.template.santander.card.state.transition.pickup")
+                .template(template)
                 .parameter("pickupLocation", pickupLocation.getPickupLocation())
-                .parameter("campus", pickupLocation.getCampus())
-                .parameter("morningHours", pickupLocation.getMorningHours().toString())
-                .parameter("afternoonHours", pickupLocation.getAfternoonHours().toString())
-                .and().wrapped().send();
+                .parameter("campus", pickupLocation.getCampus());
+
+        if (pickupLocation.getMorningHours() != null) {
+            builder = builder.parameter("morningHours", pickupLocation.getMorningHours().toString())
+                    .parameter("afternoonHours", pickupLocation.getAfternoonHours().toString());
+        }
+
+        builder.and().wrapped().send();
     }
 
     public static void notifyCardExpiring(User user) {
