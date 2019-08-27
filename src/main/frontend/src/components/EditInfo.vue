@@ -11,20 +11,19 @@
         <div
           v-if="!hasPendingRequest"
           class="form">
-          <h1 class="h2">Is everything right?</h1>
+          <h1 class="h2">{{ $t('modal.title.requestNew') }}</h1>
           <div class="f-group">
-            <p>Photo</p>
-            <p class="small f-field--readonly">Your photo is managed in your <a
+            <p>{{ $t('label.photo') }}</p>
+            <p class="small f-field--readonly">{{ $t('modal.message.parts.first.editInfo') }} <a
               class="u-active-link"
-              href="https://fenix.tecnico.ulisboa.pt/">Fenix personal area</a>. In case you want
-              to <a
+              href="https://fenix.tecnico.ulisboa.pt/">{{ $t('modal.message.parts.second.editInfo') }}</a>. {{ $t('modal.message.parts.third.editInfo') }} <a
                 class="u-active-link"
-                href="https://fenix.tecnico.ulisboa.pt/">change it</a>, please mind that it will be pending approval to figure on your card.
+                href="https://fenix.tecnico.ulisboa.pt/">{{ $t('modal.message.parts.fourth.editInfo') }}</a>, {{ $t('modal.message.parts.fifth.editInfo') }}.
             </p>
           </div>
           <div class="f-group">
             <div>
-              <p>Name</p>
+              <p>{{ $t('id-card.label.name') }}</p>
               <a
                 class="u-active-link small"
                 @click.prevent="resetNames">Reset</a>
@@ -36,12 +35,11 @@
             <p
               v-if="userNameExceedsLength"
               class="small f-field__validation danger">
-              Please shorten your displayed name (until 40 chars including spaces).
+              {{ $t('modal.message.editInfo.shorten.name') }}
             </p>
             <p
               v-else
-              class="small f-field__validation">If you want to shorten your displayed name,
-              choose at least one of your first and last names.
+              class="small f-field__validation">{{ $t('modal.message.editInfo.name.requirements') }}
             </p>
           </div>
         </div>
