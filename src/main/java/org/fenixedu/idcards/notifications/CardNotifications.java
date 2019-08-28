@@ -67,9 +67,9 @@ public class CardNotifications {
 
         PickupLocation pickupLocation = entry.getSantanderCardInfo().getPickupLocation();
 
-        String template = pickupLocation.getMorningHours() == null ?
-                "message.template.santander.card.state.transition.pickup" :
-                "message.template.santander.card.state.transition.pickup.with.working.hours";
+        String template = PickupLocation.ALAMEDA_SANTANDER.equals(pickupLocation) ?
+                "message.template.santander.card.state.transition.pickup.alameda.santander" :
+                "message.template.santander.card.state.transition.pickup";
 
         Message.TemplateMessageBuilder builder = Message.fromSystem()
                 .to(Group.users(entry.getUser()))
@@ -77,9 +77,9 @@ public class CardNotifications {
                 .parameter("pickupLocation", pickupLocation.getPickupLocation())
                 .parameter("campus", pickupLocation.getCampus());
 
-        if (pickupLocation.getMorningHours() != null) {
-            builder = builder.parameter("morningHours", pickupLocation.getMorningHours().toString())
-                    .parameter("afternoonHours", pickupLocation.getAfternoonHours().toString());
+        if (PickupLocation.ALAMEDA_SANTANDER.equals(pickupLocation)) {
+            builder = builder.parameter("morningHours", "11:00 - 12:00")
+                    .parameter("afternoonHours", "15:00 - 16:00");
         }
 
         builder.and().wrapped().send();

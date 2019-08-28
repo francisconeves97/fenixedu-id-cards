@@ -2,8 +2,6 @@ package org.fenixedu.idcards.domain;
 
 import org.fenixedu.santandersdk.dto.PickupAddress;
 
-import java.time.LocalTime;
-
 public enum PickupLocation {
     ALAMEDA_SANTANDER(
             "Santander",
@@ -11,9 +9,7 @@ public enum PickupLocation {
             "Instituto Superior Técnico",
             "1049-001",
             "Lisboa",
-            "Alameda",
-            new TimeInterval(LocalTime.parse("11:00"), LocalTime.parse("12:00")),
-            new TimeInterval(LocalTime.parse("15:00"), LocalTime.parse("16:00"))
+            "Alameda"
     ),
     ALAMEDA_DRH(
             "DRH",
@@ -21,9 +17,7 @@ public enum PickupLocation {
             "Instituto Superior Técnico",
             "1049-001",
             "Lisboa",
-            "Alameda",
-            null,
-            null
+            "Alameda"
     ),
     TAGUS_NAGT(
             "NAGT",
@@ -31,9 +25,7 @@ public enum PickupLocation {
             "Instituto Superior Técnico",
             "2744-016",
             "Lisboa",
-            "Tagus",
-            null,
-            null
+            "Tagus"
     ),
     TAGUS_DRH(
             "DRH",
@@ -41,9 +33,7 @@ public enum PickupLocation {
             "Instituto Superior Técnico",
             "2744-016",
             "Lisboa",
-            "Tagus",
-            null,
-            null
+            "Tagus"
     ),
     CTN_RH(
             "Recursos Humanos",
@@ -51,9 +41,7 @@ public enum PickupLocation {
             "Campus Tecnológico e Nuclear",
             "2695-066",
             "Bobadela",
-            "Campus Tecnológico e Nuclear",
-            null,
-            null
+            "Campus Tecnológico e Nuclear"
     );
 
 
@@ -63,19 +51,15 @@ public enum PickupLocation {
     private String zipCode;
     private String zipDescriptive;
     private String campus;
-    private TimeInterval morningHours;
-    private TimeInterval afternoonHours;
 
     PickupLocation(String pickupLocation, String address1, String address2, String zipCode,
-            String zipDescriptive, String campus, TimeInterval morningHours, TimeInterval afternoonHours) {
+            String zipDescriptive, String campus) {
         this.pickupLocation = pickupLocation;
         this.address1 = address1;
         this.address2 = address2;
         this.zipCode = zipCode;
         this.zipDescriptive = zipDescriptive;
         this.campus = campus;
-        this.morningHours = morningHours;
-        this.afternoonHours = afternoonHours;
     }
 
     public String getPickupLocation() {
@@ -102,44 +86,13 @@ public enum PickupLocation {
         return campus;
     }
 
-    public TimeInterval getMorningHours() {
-        return morningHours;
-    }
-
-    public TimeInterval getAfternoonHours() {
-        return afternoonHours;
-    }
-
     public PickupAddress toPickupAddress() {
         PickupAddress pickupAddress = new PickupAddress();
-        pickupAddress.setAddress1(this.address1);
-        pickupAddress.setAddress2(String.format("%s, %s", this.pickupLocation, this.address2));
-        pickupAddress.setZipCode(this.zipCode);
-        pickupAddress.setZipDescriptive(this.zipDescriptive);
+        pickupAddress.setAddress1(getAddress1());
+        pickupAddress.setAddress2(String.format("%s, %s", getPickupLocation(), getAddress2()));
+        pickupAddress.setZipCode(getZipCode());
+        pickupAddress.setZipDescriptive(getZipDescriptive());
 
         return pickupAddress;
-    }
-
-    public static class TimeInterval {
-        private LocalTime startDate;
-        private LocalTime endDate;
-
-        TimeInterval(LocalTime startDate, LocalTime endDate) {
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
-
-        public LocalTime getStartDate() {
-            return startDate;
-        }
-
-        public LocalTime getEndDate() {
-            return endDate;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("%s - %s", getStartDate(), getEndDate());
-        }
     }
 }
