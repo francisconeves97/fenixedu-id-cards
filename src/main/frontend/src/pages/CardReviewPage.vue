@@ -14,12 +14,20 @@
     <p
       v-if="!isMobile"
       class="p--default">Here's a preview of your new card <br>with your information reviewed.</p>
-    <div class="layout-list-cards__actions">
+    <div
+      class="layout-list-cards__actions btn--group">
       <button
         class="btn btn--light"
         @click.prevent="openEditModal"
       >
         {{ $t('btn.edit') }}
+      </button>
+      <button
+        v-if="$route.query.redirect"
+        class="btn btn--primary"
+        @click.prevent="redirect"
+      >
+        {{ $t('btn.finish') }}
       </button>
     </div>
     <edit-info
@@ -83,6 +91,9 @@ export default {
     },
     closeEditModal () {
       this.editModal = false
+    },
+    redirect () {
+      window.location.replace(this.$route.query.redirect)
     }
   }
 }
