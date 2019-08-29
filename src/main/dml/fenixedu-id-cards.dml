@@ -48,6 +48,12 @@ class SantanderCardStateTransition {
 	DateTime transitionDate;
 }
 
+class RaspberryPiSession {
+	String ipAddress;
+	String userMifare;
+	DateTime createdAt;
+}
+
 /*
  * Relations definitions
  * 
@@ -59,6 +65,19 @@ relation BennuSantanderEntry {
 		multiplicity *;
 	}
 }
+
+relation BennuRaspberryPiSession {
+	.org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
+	RaspberryPiSession playsRole raspberryPiSession {
+		multiplicity *;
+	}
+}
+
+relation UserRaspberryPiSession {
+	.org.fenixedu.bennu.core.domain.User playsRole manager;
+	RaspberryPiSession playsRole raspberryPiSession;
+}
+
 
 relation BennuSantanderCardInfo {
 	.org.fenixedu.bennu.core.domain.Bennu playsRole bennu;
