@@ -9,17 +9,20 @@ public class RaspberryPiSession extends RaspberryPiSession_Base {
     private RaspberryPiSession(String ipAddress) {
         super();
         setIpAddress(ipAddress);
+        setBennu(Bennu.getInstance());
     }
 
-    public static RaspberryPiSession init(String ipAddress, User manager) {
+    public static RaspberryPiSession init(String ipAddress, User admin) {
         RaspberryPiSession piSession =  Bennu.getInstance().getRaspberryPiSessionSet().stream()
                 .filter(r -> r.getIpAddress().equals(ipAddress))
                 .findAny()
                 .orElseGet(() -> new RaspberryPiSession(ipAddress));
 
-        piSession.setManager(manager);
+        piSession.setAdmin(admin);
         piSession.setCreatedAt(new DateTime());
         piSession.setUserMifare(null);
+        piSession.setUserCardInfo(null);
+
         return piSession;
     }
 

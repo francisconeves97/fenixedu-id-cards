@@ -18,9 +18,15 @@ async function deliverCard (id) {
   await client.put(`/idcards/${id}/deliver`, null, { headers: { 'X-Requested-With': 'fenixedu-id-cards-frontend' } })
 }
 
+async function getAdminSession () {
+  const response = await client.get('/idcards/deliver/admin-session')
+  return response.data
+}
+
 export default {
   getCards,
   getPreview,
   requestNew,
-  deliverCard
+  deliverCard,
+  getAdminSession
 }

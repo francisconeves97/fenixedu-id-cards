@@ -73,11 +73,15 @@ relation BennuRaspberryPiSession {
 	}
 }
 
-relation UserRaspberryPiSession {
-	.org.fenixedu.bennu.core.domain.User playsRole manager;
+relation AdminRaspberryPiSession {
+	.org.fenixedu.bennu.core.domain.User playsRole admin;
 	RaspberryPiSession playsRole raspberryPiSession;
 }
 
+relation CardInfoRaspberryPiSession {
+	SantanderCardInfo playsRole userCardInfo;
+	RaspberryPiSession playsRole raspberryPiSession;
+}
 
 relation BennuSantanderCardInfo {
 	.org.fenixedu.bennu.core.domain.Bennu playsRole bennu;

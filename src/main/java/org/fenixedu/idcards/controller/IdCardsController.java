@@ -10,6 +10,7 @@ import org.fenixedu.idcards.domain.SantanderCardInfo;
 import org.fenixedu.idcards.domain.SantanderCardState;
 import org.fenixedu.idcards.domain.SantanderEntry;
 import org.fenixedu.idcards.dto.DeliverSessionMifareRequest;
+import org.fenixedu.idcards.dto.RaspberryPiSessionDto;
 import org.fenixedu.idcards.service.SantanderIdCardsService;
 import org.fenixedu.santandersdk.exception.SantanderValidationException;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 
+import pt.ist.fenixframework.Atomic;
 import pt.ist.fenixframework.FenixFramework;
 
 import javax.servlet.http.HttpServletRequest;
@@ -104,24 +106,22 @@ public class IdCardsController {
         }
     }
 
-    @RequestMapping(value = "deliver/session-mifare", method = RequestMethod.GET)
-    public ResponseEntity<?> getSessionMifare(User user) {
+    @RequestMapping(value = "deliver/admin-session", method = RequestMethod.GET)
+    public ResponseEntity<?> getAdminSession(User user) {
         if (isIdCardManager(user)) {
             RaspberryPiSession raspberryPiSession = user.getRaspberryPiSession();
 
             if (raspberryPiSession == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            } else if (raspberryPiSession.getUserMifare() == null) {
                 return ResponseEntity.notFound().build();
             }
 
-            return ResponseEntity.ok(raspberryPiSession);
+            return ResponseEntity.ok(RaspberryPiSessionDto.create(raspberryPiSession));
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
-    @RequestMapping(value = "deliver/session-mifare", method = RequestMethod.PUT)
-    public ResponseEntity<?> deliverSessionMifare(@RequestBody DeliverSessionMifareRequest request, User user) {
+    @RequestMapping(value = "deliver/admin-session", method = RequestMethod.PUT)
+    public ResponseEntity<?> deliverMifare(@RequestBody DeliverSessionMifareRequest request, User user) {
         if (isIdCardManager(user)) {
             User userToDeliver = User.findByUsername(request.getIstId());
 
@@ -143,7 +143,8 @@ public class IdCardsController {
 
     @SkipCSRF
     @RequestMapping(value = "deliver/{mifare}", method = RequestMethod.PUT)
-    public ResponseEntity<?> deliver(@PathVariable String mifare, @RequestHeader("X-Requested-With") String requestedWith, HttpServletRequest request) {
+    public ResponseEntity<?> deliver(@PathVariable String mifare, @RequestHeader("X-Requested-With") String requestedWith,
+            HttpServletRequest request) {
         try {
             final Long mifareNumber = Long.parseLong(mifare);
             return Bennu.getInstance().getSantanderCardInfoSet().stream()
@@ -157,16 +158,18 @@ public class IdCardsController {
                         }
                     }).findAny().map(card -> {
                         FenixFramework.atomic(() -> {
-                            if (card.getSantanderEntry().getState().equals(SantanderCardState.DELIVERED) && isIdCardManager(card.getSantanderEntry().getUser())) {
-                                RaspberryPiSession.init(request.getRemoteAddr(), card.getSantanderEntry().getUser());
+                            User user = User.findByUsername(card.getIdentificationNumber());
+                                if (isIdCardManager(user) && card.getSantanderCardStateTransitionsSet().stream()
+                                    .anyMatch(t -> t.getState().equals(SantanderCardState.DELIVERED))) {
+                                RaspberryPiSession.init(request.getRemoteAddr(), user);
                             } else {
-                                registerMifareSession(request.getRemoteAddr(), mifare);
+                                registerMifareSession(request.getRemoteAddr(), mifare, card);
                                 card.getSantanderEntry().updateState(SantanderCardState.DELIVERED);
                             }
                         });
                         return ResponseEntity.ok().build();
                     }).orElseGet(() -> {
-                        registerMifareSession(request.getRemoteAddr(), mifare);
+                        registerMifareSession(request.getRemoteAddr(), mifare, null);
                         return ResponseEntity.notFound().build();
                     });
         } catch (NumberFormatException nfe) {
@@ -177,13 +180,13 @@ public class IdCardsController {
         }
     }
 
-    private void registerMifareSession(String ipAddress, String mifare) {
-        FenixFramework.atomic(() -> {
-            RaspberryPiSession raspberryPiSession = RaspberryPiSession.getSessionByIpAddress(ipAddress);
-            if (raspberryPiSession != null) {
-                raspberryPiSession.setUserMifare(mifare);
-            }
-        });
+    @Atomic(mode = Atomic.TxMode.WRITE)
+    private void registerMifareSession(String ipAddress, String mifare, SantanderCardInfo cardInfo) {
+        RaspberryPiSession raspberryPiSession = RaspberryPiSession.getSessionByIpAddress(ipAddress);
+        if (raspberryPiSession != null) {
+            raspberryPiSession.setUserMifare(mifare);
+            raspberryPiSession.setUserCardInfo(cardInfo);
+        }
     }
 
     @SkipCSRF
