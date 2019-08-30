@@ -171,8 +171,19 @@ export default {
     }
   }
 
+  .not-found-container {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .session-container {
     margin-top: 2rem;
+
+    .loading-bar {
+      margin-top: 6rem;
+    }
 
     .session-info-container {
       display: flex;
