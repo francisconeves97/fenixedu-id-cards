@@ -8,7 +8,6 @@ import org.fenixedu.idcards.domain.SantanderEntry;
 import org.fenixedu.messaging.core.domain.Message;
 import org.fenixedu.messaging.core.template.DeclareMessageTemplate;
 import org.fenixedu.messaging.core.template.TemplateParameter;
-import org.joda.time.DateTime;
 
 @DeclareMessageTemplate(
         id = "message.template.santander.card.state.transition.requested",
@@ -51,6 +50,14 @@ import org.joda.time.DateTime;
                 @TemplateParameter(id = "missingInfo", description = "Missing info")
         }
 )
+
+@DeclareMessageTemplate(
+        id = "message.template.santander.card.first",
+        description = "Review information for first card",
+        subject = "IST card information",
+        text = "Please review your card info, so it comes accurately in your next card and it can proceed to the automatic request. Alternativly you can use this (link) to make a manual request after validating your information"
+)
+
 public class CardNotifications {
 
     public static void notifyStateTransition(SantanderEntry entry) {
@@ -99,4 +106,12 @@ public class CardNotifications {
                 .parameter("missingInfo", missingInfo)
                 .and().wrapped().send();
     }
+
+    public static void notifyFirstCardInfoCheck(User user) {
+        Message.fromSystem()
+            .to(Group.users(user))
+            .template("message.template.santander.card.first")
+            .and().wrapped().send();
+    }
+
 }
