@@ -120,8 +120,10 @@ public class IdCardsController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    @SkipCSRF
     @RequestMapping(value = "deliver/admin-session", method = RequestMethod.PUT)
-    public ResponseEntity<?> deliverMifare(@RequestBody DeliverSessionMifareRequest request, User user) {
+    public ResponseEntity<?> deliverMifare(@RequestHeader("X-Requested-With") String requestedWith,
+            @RequestBody DeliverSessionMifareRequest request, User user) {
         if (isIdCardManager(user)) {
             User userToDeliver = User.findByUsername(request.getIstId());
 
@@ -134,6 +136,7 @@ public class IdCardsController {
 
                 card.setMifareNumber(request.getMifare());
                 card.getSantanderEntry().updateState(SantanderCardState.DELIVERED);
+                registerMifareSession(user.getRaspberryPiSession().getIpAddress(), request.getMifare(), card);
             });
 
             return ResponseEntity.noContent().build();

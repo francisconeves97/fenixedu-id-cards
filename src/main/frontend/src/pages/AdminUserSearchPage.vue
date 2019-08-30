@@ -80,11 +80,11 @@
                 <input
                   v-model="deliverUsername"
                   placeholder="Introduzir username"
-                  @keyup.enter="goToUserPage" >
+                  @keyup.enter="submitUserMifare" >
               </div>
               <button
                 class="btn btn--primary btn--outline"
-                @click.prevent="goToUserPage">
+                @click.prevent="submitUserMifare">
                 Submeter
               </button>
             </div>
@@ -144,6 +144,13 @@ export default {
         this.session = await CardsAPI.getAdminSession()
       } catch (err) {
         this.session = undefined
+      }
+    },
+    async submitUserMifare () {
+      try {
+        await CardsAPI.submitUserMifare({ mifare: this.session.userMifare, istId: this.deliverUsername })
+      } catch (err) {
+        console.log(err)
       }
     }
   }

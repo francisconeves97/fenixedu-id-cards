@@ -23,10 +23,15 @@ async function getAdminSession () {
   return response.data
 }
 
+async function submitUserMifare (request) {
+  await client.put('/idcards/deliver/admin-session', request, { headers: { 'X-Requested-With': 'fenixedu-id-cards-frontend' } })
+}
+
 export default {
   getCards,
   getPreview,
   requestNew,
   deliverCard,
-  getAdminSession
+  getAdminSession,
+  submitUserMifare
 }
