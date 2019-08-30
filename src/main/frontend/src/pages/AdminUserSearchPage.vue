@@ -71,11 +71,17 @@
           <div
             v-else>
             <div class="user-not-found">
-              {{ session.userMifare }}
-              <input
-                v-model="deliverUsername"
-                placeholder="Introduzir username"
-                @keyup.enter="goToUserPage" >
+              <div class="field">
+                <label>Mifare</label>
+                <p>{{ session.userMifare }}</p>
+              </div>
+              <div class="field">
+                <label>Username</label>
+                <input
+                  v-model="deliverUsername"
+                  placeholder="Introduzir username"
+                  @keyup.enter="goToUserPage" >
+              </div>
               <button
                 class="btn btn--primary btn--outline"
                 @click.prevent="goToUserPage">
@@ -223,10 +229,20 @@ export default {
           align-items: center;
         }
 
-      & .user-not-found {
+      .user-not-found {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        align-items: end;
+        justify-content: center;
+
+        .field {
+          display: flex;
+          flex-direction: column;
+          margin-right: 2rem;
+
+          label {
+            margin-bottom: 0.5rem;
+          }
+        }
       }
     }
   }
