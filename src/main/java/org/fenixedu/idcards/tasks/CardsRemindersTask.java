@@ -13,30 +13,35 @@ import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
 @Task(englishTitle = "Notify users with expiring cards", readOnly = true)
-public class NotifyExpiringCardsTask extends CronTask {
+public class CardsRemindersTask extends CronTask {
 
-    private static final Logger logger = LoggerFactory.getLogger(NotifyExpiringCardsTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(CardsRemindersTask.class);
     private final int DAYS_TO_EXPIRE = 30;   // TODO: check santander request rate
 
     @Override
     public Atomic.TxMode getTxMode() {
-        return Atomic.TxMode.READ;
+        return Atomic.TxMode.WRITE;
     }
 
     @Override
     public void runTask() {
         Bennu.getInstance().getUserSet().stream().filter(u -> SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState()))
-                .forEach(this::notifyExpiringCard);
+                .forEach(this::remindUser);
     }
 
-    public void notifyExpiringCard(User user) {
+    public void remindUser(User user) {
         SantanderEntry entry = user.getCurrentSantanderEntry();
         SantanderCardState newState = entry.getState();
-        if (SantanderCardState.ISSUED.equals(newState) && DateTime.now().isBefore(entry.getSantanderCardInfo()
-                .getLastTransition().getTransitionDate().plusDays(DAYS_TO_EXPIRE)) && entry.getWasExpiringNotified()) {
+        if (SantanderCardState.ISSUED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
+                .getExpiryDate().minusDays(DAYS_TO_EXPIRE))) {
             entry.setWasExpiringNotified(true);
             CardNotifications.notifyCardExpiring(user);
-            taskLog("Notifying user: %s%n", user.getUsername());
+            taskLog("Notifying user for expiring card: %s%n", user.getUsername());
+        } else if (SantanderCardState.ISSUED.equals(entry.getState()) && !entry.getWasPickupNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
+                .getLastTransition().getTransitionDate().plusDays(15))) {
+            entry.setWasPickupNotified(true);
+            CardNotifications.notifyCardPickup(user);
+            taskLog("Notifying user to pickup card: %s%n", user.getUsername());
         }
     }
 }
