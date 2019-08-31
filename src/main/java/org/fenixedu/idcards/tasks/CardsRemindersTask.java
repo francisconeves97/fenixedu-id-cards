@@ -25,11 +25,13 @@ public class CardsRemindersTask extends CronTask {
 
     @Override
     public void runTask() {
-        Bennu.getInstance().getUserSet().stream().filter(u -> SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState()))
+        Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() != null &&
+                SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState()))
                 .forEach(this::remindUser);
     }
 
     public void remindUser(User user) {
+        
         SantanderEntry entry = user.getCurrentSantanderEntry();
         SantanderCardState newState = entry.getState();
         if (SantanderCardState.ISSUED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
