@@ -50,18 +50,21 @@ public class CardNotifications {
                     .to(Group.users(entry.getUser()))
                     .template("message.template.santander.card.state.transition.requested")
                     .and().wrapped().send();
-        } else if (SantanderCardState.ISSUED.equals(entry.getState()) && DateTime.now().plusDays(15).isBefore(entry.getSantanderCardInfo()
-                .getLastTransition().getTransitionDate()) && entry.getWasPickupNotified()) {
-            PickupLocation pickupLocation = entry.getSantanderCardInfo().getPickupLocation();
-            Message.fromSystem()
-                    .to(Group.users(entry.getUser()))
-                    .template("message.template.santander.card.state.transition.pickup")
-                    .parameter("pickupLocation", pickupLocation.getPickupLocation())
-                    .parameter("campus", pickupLocation.getCampus())
-                    .parameter("morningHours", pickupLocation.getMorningHours().toString())
-                    .parameter("afternoonHours", pickupLocation.getAfternoonHours().toString())
-                    .and().wrapped().send();
         }
+    }
+
+    public static void notifyCardPickup(User user) {
+        SantanderEntry entry = user.getCurrentSantanderEntry();
+
+        PickupLocation pickupLocation = entry.getSantanderCardInfo().getPickupLocation();
+        Message.fromSystem()
+                .to(Group.users(entry.getUser()))
+                .template("message.template.santander.card.state.transition.pickup")
+                .parameter("pickupLocation", pickupLocation.getPickupLocation())
+                .parameter("campus", pickupLocation.getCampus())
+                .parameter("morningHours", pickupLocation.getMorningHours().toString())
+                .parameter("afternoonHours", pickupLocation.getAfternoonHours().toString())
+                .and().wrapped().send();
     }
 
     public static void notifyCardExpiring(User user) {
