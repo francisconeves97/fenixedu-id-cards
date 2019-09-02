@@ -69,17 +69,20 @@
             </div>
           </div>
           <div
-            v-else>
+            v-else
+            class="user-not-found-container">
+            <h5 class="h5">Mifare não encontrado</h5>
+            <p>Introduza o username do utilizador para associar o mifare ao cartão do mesmo.</p>
             <div class="user-not-found">
               <div class="field">
-                <label>Mifare</label>
+                <p>Mifare</p>
                 <p>{{ session.userMifare }}</p>
               </div>
               <div class="field">
-                <label>Username</label>
+                <p>Username</p>
                 <input
                   v-model="deliverUsername"
-                  placeholder="Introduzir username"
+                  placeholder=""
                   @keyup.enter="submitUserMifare" >
               </div>
               <button
@@ -231,23 +234,37 @@ export default {
       }
 
       .check-icon-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .user-not-found-container {
+        margin-top: 2rem;
+
+        h5 {
+          text-align: center;
+          margin-bottom: 0;
         }
 
-      .user-not-found {
-        display: flex;
-        align-items: end;
-        justify-content: center;
+        & > p {
+          text-align: center;
+          margin-bottom: 2rem;
+        }
 
-        .field {
+        .user-not-found {
           display: flex;
-          flex-direction: column;
-          margin-right: 2rem;
+          align-items: end;
+          justify-content: center;
 
-          label {
-            margin-bottom: 0.5rem;
+          .field {
+            display: flex;
+            flex-direction: column;
+            margin-right: 2rem;
+
+            label {
+              margin-bottom: 0.5rem;
+            }
           }
         }
       }
