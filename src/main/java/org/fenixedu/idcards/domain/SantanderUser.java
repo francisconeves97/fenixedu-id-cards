@@ -8,6 +8,7 @@ import org.fenixedu.idcards.exception.SantanderCardNoPermissionException;
 import org.fenixedu.idcards.service.IUserInfoService;
 import org.fenixedu.santandersdk.dto.CreateRegisterRequest;
 import org.fenixedu.santandersdk.dto.RegisterAction;
+import pt.ist.fenixframework.Atomic;
 
 public class SantanderUser {
     private User user;
@@ -96,18 +97,22 @@ public class SantanderUser {
     }
 
     public String getName() {
-        SantanderUserInfo santanderUserInfo = user.getSantanderUserInfo();
-
-        if (santanderUserInfo == null) {
-            String fullName = getFullName();
-            String[] fullNameParts = fullName.trim().split(" ");
-            String cardName = fullNameParts[0] + " " + fullNameParts[fullNameParts.length - 1];
-            santanderUserInfo = new SantanderUserInfo();
-            santanderUserInfo.setCardName(cardName);
-            user.setSantanderUserInfo(santanderUserInfo);
+        if (user.getSantanderUserInfo() == null) {
+            setUserInfo();
         }
 
-        return santanderUserInfo.getCardName();
+        return user.getSantanderUserInfo().getCardName();
+    }
+
+    @Atomic
+    private void setUserInfo() {
+        final String fullName = getFullName();
+        final String[] fullNameParts = fullName.trim().split(" ");
+        final String cardName = fullNameParts[0] + " " + fullNameParts[fullNameParts.length - 1];
+
+        SantanderUserInfo santanderUserInfo = new SantanderUserInfo();
+        santanderUserInfo.setCardName(cardName);
+        user.setSantanderUserInfo(santanderUserInfo);
     }
 
     public String getFullName() {
