@@ -53,7 +53,8 @@ export default {
       mobileMenuBreakpoint: 768,
       isMobile: false,
       windowWidth: 0,
-      editModal: false
+      editModal: false,
+      redirectUrl: 'https://google.com'
     }
   },
   computed: {
@@ -94,7 +95,9 @@ export default {
       this.editModal = false
     },
     redirect () {
-      window.location.replace(this.$route.query.redirect)
+      if (this.$route.query.redirect) {
+        window.location.replace(this.redirectUrl)
+      }
     }
   }
 }
