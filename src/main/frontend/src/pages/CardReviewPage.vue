@@ -2,7 +2,7 @@
   <div
     v-if="cardPreview && !isInitialLoading"
     class="layout-list-cards layout-list-cards-form">
-    <h1 class="h2">Your next card</h1>
+    <h1 class="h2">{{ $t('modal.title.confirmData') }}</h1>
     <p
       v-if="isMobile"
       class="p--default">
