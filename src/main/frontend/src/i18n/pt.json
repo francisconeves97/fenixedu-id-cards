@@ -74,7 +74,7 @@
   "modal.message.parts.third.editInfo": "Caso queira",
   "modal.message.parts.fourth.editInfo": "mudá-la",
   "modal.message.parts.fifth.editInfo": "por favor, tenha em conta que esta estará pendente de aprovação para figurar no seu cartão",
-  "modal.message.editInfo.shorten.name": "Por favor diminua o nome apresentado (até ter 40 caracteres incluindo espaços).",
+  "modal.message.editInfo.shorten.name": "Por favor, reduza o seu nome de apresentação (até perfazer, no máximo, 40 caracteres).",
   "modal.message.editInfo.name.requirements": "Se quer diminuir o nome apresentado, escolha pelo menos um dos seus primeiros e últimos nomes.",
   "modal.message.first.confirmData": "Estes dados são obtidos a partir do Fénix.",
   "modal.message.second.confirmData": "Por favor confirme que estão atualizados para que o seu cartão tenha a informação precisa.",
@@ -86,5 +86,7 @@
   "text.pickupLocations.alameda.drh": "DRH, Instituto Superior Técnico - Alameda (Pavilhão Central)",
   "text.pickupLocations.tagus.nagt": "NAGT, Instituto Superior Técnico - TagusPark",
   "text.pickupLocations.tagus.drh": "DRH, Instituto Superior Técnico - TagusPark",
-  "text.pickupLocations.ctn.rh": "Recursos Humanos, Campus Tecnológico e Nuclear"
+  "text.pickupLocations.ctn.rh": "Recursos Humanos, Campus Tecnológico e Nuclear",
+  "text.review.parts.first.page": "O seu cartão terá a informação atualizada",
+  "text.review.parts.second.page": "de acordo com esta pré-visualização."
 }

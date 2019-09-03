@@ -6,7 +6,7 @@
     <p
       v-if="isMobile"
       class="p--default">
-      Here's a preview of your new card <br>with your information reviewed.
+      {{ $t('text.review.parts.first.page') }} <br>{{ $t('text.review.parts.second.page') }}
     </p>
     <id-card
       :card-info="cardPreview"
@@ -15,7 +15,7 @@
     <p
       v-if="!isMobile"
       class="p--default">
-      Here's a preview of your new card <br>with your information reviewed.
+      {{ $t('text.review.parts.first.page') }} <br>{{ $t('text.review.parts.second.page') }}
     </p>
     <div
       class="layout-list-cards__actions btn--group">
