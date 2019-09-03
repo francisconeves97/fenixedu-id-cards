@@ -5,28 +5,29 @@
     <h1 class="h2">Your next card</h1>
     <p
       v-if="isMobile"
-      class="p--default">Here's a preview of your new card <br>with your information reviewed.</p>
+      class="p--default">
+      Here's a preview of your new card <br>with your information reviewed.
+    </p>
     <id-card
       :card-info="cardPreview"
       :cardtype="'idtecnico'"
-      :is-preview="true"
-    />
+      :is-preview="true"/>
     <p
       v-if="!isMobile"
-      class="p--default">Here's a preview of your new card <br>with your information reviewed.</p>
+      class="p--default">
+      Here's a preview of your new card <br>with your information reviewed.
+    </p>
     <div
       class="layout-list-cards__actions btn--group">
       <button
         class="btn btn--light"
-        @click.prevent="openEditModal"
-      >
+        @click.prevent="openEditModal">
         {{ $t('btn.edit') }}
       </button>
       <button
         v-if="$route.query.redirect"
         class="btn btn--primary"
-        @click.prevent="redirect"
-      >
+        @click.prevent="redirect">
         {{ $t('btn.finish') }}
       </button>
     </div>
