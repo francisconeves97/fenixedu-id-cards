@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pt.ist.fenixframework.Atomic;
 
-@Task(englishTitle = "Notify users with expiring cards", readOnly = true)
+@Task(englishTitle = "Remind users with expiring cards and cards to pickup", readOnly = true)
 public class SantanderCardsRemindersTask extends CronTask {
 
     private static final Logger logger = LoggerFactory.getLogger(SantanderCardsRemindersTask.class);
@@ -26,14 +26,15 @@ public class SantanderCardsRemindersTask extends CronTask {
     @Override
     public void runTask() {
         Bennu.getInstance().getUserSet().stream().filter(u -> u.getCurrentSantanderEntry() != null &&
-                SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState()))
+                (SantanderCardState.ISSUED.equals(u.getCurrentSantanderEntry().getState())
+                || SantanderCardState.DELIVERED.equals(u.getCurrentSantanderEntry().getState())))
                 .forEach(this::remindUser);
     }
 
     private void remindUser(User user) {
         SantanderEntry entry = user.getCurrentSantanderEntry();
-        SantanderCardState newState = entry.getState();
-        if (SantanderCardState.DELIVERED.equals(newState) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
+        SantanderCardState state = entry.getState();
+        if (SantanderCardState.DELIVERED.equals(state) && !entry.getWasExpiringNotified() && DateTime.now().isAfter(entry.getSantanderCardInfo()
                 .getExpiryDate().minusDays(DAYS_TO_EXPIRE))) {
             entry.setWasExpiringNotified(true);
             CardNotifications.notifyCardExpiring(user);
